@@ -23,7 +23,7 @@ void SetupRC();
 float DegreeX, DegreeY, DegreeZ;
 float MoveZ;
 XYZPOS table_top[4], table_bottom[4], job_table[4];
-BUILD build_cube[10][5][5];
+BUILD build_cube[JOB_TABLE_SIZE][MAX_HEIGHT][JOB_TABLE_SIZE];
 XYZPOS picked_cube, build_idx;
 int picked_idx;
 
@@ -54,15 +54,19 @@ void SetupRC() {
 	picked_idx = 0;
 	build_idx = { 2,0,4 };
 
-	for (int i = 0; i < MAX_HEIGHT; ++i)
-	{// y
-		for (int j = 0; j < JOB_TABLE_SIZE; ++j)
-		{// z
+
+	// 쌓인블록위치 저장배열 build_cube[x][y][z];
+	// x는 왼쪽에서 오른쪽의 가로방향
+	// z는 안쪽에서 바깥쪽으로의 세로방향
+	for (int i = 0; i < JOB_TABLE_SIZE; ++i)
+	{// x
+		for (int j = 0; j < MAX_HEIGHT; ++j)
+		{// y
 			for (int k = 0; k < JOB_TABLE_SIZE; ++k)
-			{// x
-				build_cube[i][j][k].x = (k - JOB_TABLE_SIZE / 2) * CUBE_SIZE;
-				build_cube[i][j][k].z = (j - JOB_TABLE_SIZE / 2) * CUBE_SIZE;
-				build_cube[i][j][k].y = i*CUBE_SIZE;
+			{// z
+				build_cube[i][j][k].x = (i - JOB_TABLE_SIZE / 2) * CUBE_SIZE;
+				build_cube[i][j][k].z = (k - JOB_TABLE_SIZE / 2) * CUBE_SIZE;
+				build_cube[i][j][k].y = j*CUBE_SIZE;
 				build_cube[i][j][k].put = false;
 			}
 		}
@@ -299,9 +303,9 @@ GLvoid drawScene(GLvoid)
 			
 			//플레이어가 쌓은 큐브
 			glColor3f(0.7f, 0.5f, 0.0f);
-			for (int i = 0; i < MAX_HEIGHT; ++i)
+			for (int i = 0; i < JOB_TABLE_SIZE; ++i)
 			{
-				for (int j = 0; j < JOB_TABLE_SIZE; ++j)
+				for (int j = 0; j < MAX_HEIGHT; ++j)
 				{
 					for (int k = 0; k < JOB_TABLE_SIZE; ++k)
 					{
@@ -309,7 +313,7 @@ GLvoid drawScene(GLvoid)
 						{
 							glPushMatrix();
 							{
-								glTranslatef(build_cube[i][j][k].x, build_cube[i][j][k].y, build_cube[i][j][k].z);
+								glTranslatef(build_cube[i][j][k].x, build_cube[i][j][k].y + CUBE_SIZE/2, build_cube[i][j][k].z);
 								glutSolidCube(CUBE_SIZE);
 							}
 							glPopMatrix();
