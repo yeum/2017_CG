@@ -1,5 +1,6 @@
 #include <GL/glut.h>
 #include <fstream>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -17,42 +18,45 @@ struct BUILD {
 	bool put;
 };
 
+enum GameMode { Main, Play, Tool };
+
 GLvoid drawScene(GLvoid);
 GLvoid Reshape(int w, int h);
 void TimerFunction(int value);
 void Keyboard(unsigned char key, int x, int y);
 void SpecialFunc(int key, int x, int y);
 void SetupRC();
+void SetupRC_byMode();
 void Mouse(int button, int state, int x, int y);
 void Motion(int x, int y);
 
-
+float Width, Height;
 float DegreeX, DegreeY, DegreeZ;
-float MoveZ;
+float MoveX, MoveY, MoveZ;
 XYZPOS table_top[4], table_bottom[4], job_table[4];
+XYZPOS table2_top[4], table2_bottom[4], job_table2[4];
 BUILD build_cube[JOB_TABLE_SIZE][MAX_HEIGHT][JOB_TABLE_SIZE];
 XYZPOS picked_cube, build_idx;
 int picked_idx;
 XYZPOS mouse;
+int Mode, PreMode;
 
 bool LEFT_BUTTON, RIGHT_BUTTON;
 
 void main(int argc, char *argv[])
 {
-	//초기화 함수들 
-	//for (int i = 0; i < JOB_TABLE_SIZE; ++i)
-	//{
-	//   for (int j = 0; j < MAX_HEIGHT; ++j)
-	//   {
-	//      for (int k = 0; k < JOB_TABLE_SIZE; ++k)
-	//      {
-	//         build_cube[i][j][k].put = true;
-	//         build_cube[i][j][k].x = 
-	//         build_cube[i][j][k].y =
-	//         build_cube[i][j][k].z =
-	//      }
-	//   }
-	//}
+	Width = 800;
+	Height = 600;
+
+	DegreeX = 0;
+	DegreeY = 0;
+	DegreeZ = 0;
+	MoveX = -300;
+	MoveY = -50;
+	MoveZ = -600;
+
+	PreMode = GameMode::Main;
+	Mode = GameMode::Main;
 
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH); // 디스플레이 모드 설정 
 	glutInitWindowPosition(100, 100); // 윈도우의 위치지정 
@@ -66,38 +70,15 @@ void main(int argc, char *argv[])
 	glutMotionFunc(Motion);
 	glutTimerFunc(100, TimerFunction, 1); // 타이머 함수 설정
 	SetupRC();   // 상태 변수 초기화 함수
+	SetupRC_byMode();   // 상태 변수 초기화 함수
 	glutMainLoop();
 }
 
 void SetupRC() {
 	// 필요한 변수들, 좌표값 등의 초기화
 	// 기능 설정 초기화
-	DegreeX = 0;
-	DegreeY = 0;
-	DegreeZ = 0;
-	MoveZ = 0;
 
-	picked_idx = 0;
-	build_idx = { 2,0,4 };
-
-
-	// 쌓인블록위치 저장배열 build_cube[x][y][z];
-	// x는 왼쪽에서 오른쪽의 가로방향
-	// z는 안쪽에서 바깥쪽으로의 세로방향
-	for (int i = 0; i < JOB_TABLE_SIZE; ++i)
-	{// x
-		for (int j = 0; j < MAX_HEIGHT; ++j)
-		{// y
-			for (int k = 0; k < JOB_TABLE_SIZE; ++k)
-			{// z
-				build_cube[i][j][k].x = (i - JOB_TABLE_SIZE / 2) * CUBE_SIZE;
-				build_cube[i][j][k].z = (k - JOB_TABLE_SIZE / 2) * CUBE_SIZE;
-				build_cube[i][j][k].y = j*CUBE_SIZE;
-				build_cube[i][j][k].put = false;
-			}
-		}
-	}
-
+	// 플레이 테이블
 	table_top[0].y = table_top[1].y = table_top[2].y = table_top[3].y = 0;
 	table_top[0].x = table_top[3].x = 150;
 	table_top[1].x = table_top[2].x = -150;
@@ -116,43 +97,158 @@ void SetupRC() {
 	job_table[0].z = job_table[1].z = -50;
 	job_table[2].z = job_table[3].z = 50;
 
-	picked_cube.x = 0;
-	picked_cube.y = job_table[0].y + CUBE_SIZE / 2;
-	picked_cube.z = job_table[3].z - CUBE_SIZE / 2;
+	// 제작 테이블
+	table2_top[0].y = table2_top[1].y = table2_top[2].y = table2_top[3].y = 0;
+	table2_top[0].x = table2_top[3].x = 750;
+	table2_top[1].x = table2_top[2].x = 450;
+	table2_top[0].z = table2_top[1].z = -100;
+	table2_top[2].z = table2_top[3].z = 100;
+
+	table2_bottom[0].y = table2_bottom[1].y = table2_bottom[2].y = table2_bottom[3].y = -30;
+	table2_bottom[0].x = table2_bottom[3].x = 750;
+	table2_bottom[1].x = table2_bottom[2].x = 450;
+	table2_bottom[0].z = table2_bottom[1].z = -100;
+	table2_bottom[2].z = table2_bottom[3].z = 100;
+
+	job_table2[0].y = job_table2[1].y = job_table2[2].y = job_table2[3].y = 1;
+	job_table2[0].x = job_table2[3].x = 650;
+	job_table2[1].x = job_table2[2].x = 550;
+	job_table2[0].z = job_table2[1].z = -50;
+	job_table2[2].z = job_table2[3].z = 50;
+}
+
+void SetupRC_byMode()
+{
+	if (Mode == GameMode::Tool)
+	{
+		picked_idx = 0;
+		build_idx = { 2,0,4 };
+
+		// 쌓인블록위치 저장배열 build_cube[x][y][z];
+		// x는 왼쪽에서 오른쪽의 가로방향
+		// z는 안쪽에서 바깥쪽으로의 세로방향
+		for (int i = 0; i < JOB_TABLE_SIZE; ++i)
+		{// x
+			for (int j = 0; j < MAX_HEIGHT; ++j)
+			{// y
+				for (int k = 0; k < JOB_TABLE_SIZE; ++k)
+				{// z
+					build_cube[i][j][k].x = table2_top[0].x - (table2_top[0].x - table2_top[1].x) / 2 + (i - JOB_TABLE_SIZE / 2) * CUBE_SIZE;
+					build_cube[i][j][k].z = (k - JOB_TABLE_SIZE / 2) * CUBE_SIZE;
+					build_cube[i][j][k].y = j*CUBE_SIZE;
+					build_cube[i][j][k].put = false;
+				}
+			}
+		}
+
+		picked_cube.x = table2_top[0].x - (table2_top[0].x - table2_top[1].x) / 2;
+		picked_cube.y = job_table2[0].y + CUBE_SIZE / 2;
+		picked_cube.z = job_table2[3].z - CUBE_SIZE / 2;
+	}
+	else
+	{
+		picked_idx = 0;
+		build_idx = { 2,0,4 };
+
+		// 쌓인블록위치 저장배열 build_cube[x][y][z];
+		// x는 왼쪽에서 오른쪽의 가로방향
+		// z는 안쪽에서 바깥쪽으로의 세로방향
+		for (int i = 0; i < JOB_TABLE_SIZE; ++i)
+		{// x
+			for (int j = 0; j < MAX_HEIGHT; ++j)
+			{// y
+				for (int k = 0; k < JOB_TABLE_SIZE; ++k)
+				{// z
+					build_cube[i][j][k].x = (i - JOB_TABLE_SIZE / 2) * CUBE_SIZE;
+					build_cube[i][j][k].z = (k - JOB_TABLE_SIZE / 2) * CUBE_SIZE;
+					build_cube[i][j][k].y = j*CUBE_SIZE;
+					build_cube[i][j][k].put = false;
+				}
+			}
+		}
+
+		picked_cube.x = 0;
+		picked_cube.y = job_table[0].y + CUBE_SIZE / 2;
+		picked_cube.z = job_table[3].z - CUBE_SIZE / 2;
+	}
 }
 
 void SpecialFunc(int key, int x, int y)
 {
 	if (key == GLUT_KEY_UP)
 	{
-		if (picked_cube.z > job_table[0].z + CUBE_SIZE)
+		if (Mode == GameMode::Play)
 		{
-			picked_cube.z -= CUBE_SIZE;
-			build_idx.z--;
+			if (picked_cube.z > job_table[0].z + CUBE_SIZE)
+			{
+				picked_cube.z -= CUBE_SIZE;
+				build_idx.z--;
+			}
+		}
+		else if (Mode == GameMode::Tool)
+		{
+			if (picked_cube.z > job_table2[0].z + CUBE_SIZE)
+			{
+				picked_cube.z -= CUBE_SIZE;
+				build_idx.z--;
+			}
 		}
 	}
 	else if (key == GLUT_KEY_DOWN)
 	{
-		if (picked_cube.z < job_table[3].z - CUBE_SIZE)
+		if (Mode == GameMode::Play)
 		{
-			picked_cube.z += CUBE_SIZE;
-			build_idx.z++;
+			if (picked_cube.z < job_table[3].z - CUBE_SIZE)
+			{
+				picked_cube.z += CUBE_SIZE;
+				build_idx.z++;
+			}
+		}
+		else if (Mode == GameMode::Tool)
+		{
+			if (picked_cube.z < job_table2[3].z - CUBE_SIZE)
+			{
+				picked_cube.z += CUBE_SIZE;
+				build_idx.z++;
+			}
 		}
 	}
 	else if (key == GLUT_KEY_RIGHT)
 	{
-		if (picked_cube.x < job_table[0].x - CUBE_SIZE)
+		if (Mode == GameMode::Play)
 		{
-			picked_cube.x += CUBE_SIZE;
-			build_idx.x++;
+			if (picked_cube.x < job_table[0].x - CUBE_SIZE)
+			{
+				picked_cube.x += CUBE_SIZE;
+				build_idx.x++;
+			}
+		}
+		else if (Mode == GameMode::Tool)
+		{
+			if (picked_cube.x < job_table2[0].x - CUBE_SIZE)
+			{
+				picked_cube.x += CUBE_SIZE;
+				build_idx.x++;
+			}
 		}
 	}
 	else if (key == GLUT_KEY_LEFT)
 	{
-		if (picked_cube.x > job_table[1].x + CUBE_SIZE)
+		if (Mode == GameMode::Play)
 		{
-			picked_cube.x -= CUBE_SIZE;
-			build_idx.x--;
+			if (picked_cube.x > job_table[1].x + CUBE_SIZE)
+			{
+				picked_cube.x -= CUBE_SIZE;
+				build_idx.x--;
+			}
+		}
+		else if (Mode == GameMode::Tool)
+		{
+			if (picked_cube.x > job_table2[1].x + CUBE_SIZE)
+			{
+				picked_cube.x -= CUBE_SIZE;
+				build_idx.x--;
+			}
 		}
 	}
 
@@ -162,13 +258,25 @@ void SpecialFunc(int key, int x, int y)
 void Keyboard(unsigned char key, int x, int y)
 {
 	if (key == 'i' || key == 'I')
+	{
 		SetupRC();
+		Reshape(Width, Height);
+	}
 	else if (key == 'x' || key == 'X')
+	{
 		DegreeX -= 1;
+		Reshape(Width, Height);
+	}
 	else if (key == 'y' || key == 'Y')
+	{
 		DegreeY -= 1;
+		Reshape(Width, Height);
+	}
 	else if (key == 'z' || key == 'Z')
+	{
 		DegreeZ -= 1;
+		Reshape(Width, Height);
+	}
 	else if (key == 'w' || key == 'W')
 	{
 		if (picked_cube.y < (MAX_HEIGHT - 1) * CUBE_SIZE)
@@ -186,20 +294,33 @@ void Keyboard(unsigned char key, int x, int y)
 		}
 	}
 	else if (key == '-')
+	{
 		MoveZ -= 10;
+		Reshape(Width, Height);
+	}
 	else if (key == '=')
+	{
 		MoveZ += 10;
+		Reshape(Width, Height);
+	}
 	else if (key == 32)
 	{// 스페이스바 입력 => 블럭 놓기
 		if (build_cube[build_idx.x][build_idx.y][build_idx.z].put == false)
 		{
-			picked_cube.x = 0;
-			picked_cube.y = job_table[0].y + CUBE_SIZE / 2;
-			picked_cube.z = job_table[3].z - CUBE_SIZE / 2;
+			if (Mode == GameMode::Play)
+			{
+				picked_cube.x = 0;
+				picked_cube.y = job_table[0].y + CUBE_SIZE / 2;
+				picked_cube.z = job_table[3].z - CUBE_SIZE / 2;
+			}
+			else if (Mode == GameMode::Tool)
+			{
+				picked_cube.x = table2_top[0].x - (table2_top[0].x - table2_top[1].x) / 2;
+				picked_cube.y = job_table2[0].y + CUBE_SIZE / 2;
+				picked_cube.z = job_table2[3].z - CUBE_SIZE / 2;
+			}
 			build_cube[build_idx.x][build_idx.y][build_idx.z].put = true;
 			build_idx = { 2,0,4 };
-
-
 		}
 
 	}
@@ -224,9 +345,18 @@ void Keyboard(unsigned char key, int x, int y)
 	{// 블럭 놓인 위치에서 백스페이스바 > 블럭 지우기
 		if (build_cube[build_idx.x][build_idx.y][build_idx.z].put == true)
 		{
-			picked_cube.x = 0;
-			picked_cube.y = job_table[0].y + CUBE_SIZE / 2;
-			picked_cube.z = job_table[3].z - CUBE_SIZE / 2;
+			if (Mode == GameMode::Play)
+			{
+				picked_cube.x = 0;
+				picked_cube.y = job_table[0].y + CUBE_SIZE / 2;
+				picked_cube.z = job_table[3].z - CUBE_SIZE / 2;
+			}
+			else if (Mode == GameMode::Tool)
+			{
+				picked_cube.x = table2_top[0].x - (table2_top[0].x - table2_top[1].x) / 2;
+				picked_cube.y = job_table2[0].y + CUBE_SIZE / 2;
+				picked_cube.z = job_table2[3].z - CUBE_SIZE / 2;
+			}
 			build_cube[build_idx.x][build_idx.y][build_idx.z].put = false;
 			build_idx = { 2,0,4 };
 
@@ -255,12 +385,64 @@ void Keyboard(unsigned char key, int x, int y)
 			}
 		}
 	}
+	else if (key == '1')
+	{
+		if (Mode != GameMode::Play)
+		{
+			PreMode = Mode;
+			Mode = GameMode::Play;
+			SetupRC_byMode();
+		}
+	}
+	else if (key == '2')
+	{
+		if (Mode != GameMode::Tool)
+		{
+			PreMode = Mode;
+			Mode = GameMode::Tool;
+			SetupRC_byMode();
+		}
+	}
 	glutPostRedisplay();
 }
 
 void TimerFunction(int value)
 {
+	if (PreMode == GameMode::Main && Mode == GameMode::Play)
+	{
+		MoveX += 20;
+		MoveZ += 20;
 
+		if (MoveX >= 0)
+			MoveX = 0;
+		if (MoveZ >= -300)
+			MoveZ = -300;
+	}
+	else if (PreMode == GameMode::Main && Mode == GameMode::Tool)
+	{
+		MoveX -= 20;
+		MoveZ += 20;
+
+		if (MoveX <= -600)
+			MoveX = -600;
+		if (MoveZ >= -300)
+			MoveZ = -300;
+	}
+	else if (PreMode == GameMode::Play && Mode == GameMode::Tool)
+	{
+		MoveX -= 20;
+
+		if (MoveX <= -600)
+			MoveX = -600;
+	}
+	else if (PreMode == GameMode::Tool && Mode == GameMode::Play)
+	{
+		MoveX += 20;
+
+		if (MoveX >= 0)
+			MoveX = 0;
+	}
+	Reshape(Width, Height);
 	glutPostRedisplay();
 	glutTimerFunc(100, TimerFunction, 1);
 }
@@ -268,107 +450,171 @@ void TimerFunction(int value)
 // 윈도우 출력 함수
 GLvoid drawScene(GLvoid)
 {
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
+
+	GLfloat ambientLight[] = { 0.4f, 0.4f, 0.4f, 1.0f };
+	GLfloat diffuseLight[] = { 1 ,1, 1, 1.0 };
+	GLfloat specular[] = { 0.4f, 0.4f, 0.4f, 1.0 };
+	GLfloat lightPos[] = { -150, 50, 150.0, 1.0 };
+	GLfloat lightPos2[] = { 650, 100, 150.0, 1.0 };
+
+	glEnable(GL_LIGHTING);
+
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientLight);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+	glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+
+	if(Mode==GameMode::Play)
+		glEnable(GL_LIGHT0);
+	else
+		glDisable(GL_LIGHT0);
+
+	glLightfv(GL_LIGHT1, GL_AMBIENT, ambientLight);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, diffuseLight);
+	glLightfv(GL_LIGHT1, GL_SPECULAR, specular);
+	glLightfv(GL_LIGHT1, GL_POSITION, lightPos2);
+	if (Mode == GameMode::Tool)
+		glEnable(GL_LIGHT1);
+	else
+		glDisable(GL_LIGHT1);
+
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
 	//glLoadIdentity();
 	glPushMatrix();
 	{
-		glRotatef(DegreeX, 1, 0, 0);
-		glRotatef(DegreeY, 0, 1, 0);
-		glRotatef(DegreeZ, 0, 0, 1);
-		glTranslatef(0, 0, MoveZ);
 
 		glPushMatrix();
-		{   ///////테이블 그리기///////
-			glColor3f(0.5f, 0.3f, 0.0f);
+		{   ///////플레이 테이블 그리기///////
 			glTranslatef(0, -50, 0);
 			glPushMatrix();
 			{
+				glColor3f(0.5f, 0.3f, 0.0f);
 				glBegin(GL_QUADS);   // 윗면
 				glVertex3f(table_top[0].x, table_top[0].y, table_top[0].z);
 				glVertex3f(table_top[1].x, table_top[1].y, table_top[1].z);
 				glVertex3f(table_top[2].x, table_top[2].y, table_top[2].z);
 				glVertex3f(table_top[3].x, table_top[3].y, table_top[3].z);
+				// 아랫면
+				glVertex3f(table_bottom[1].x, table_bottom[1].y, table_bottom[1].z);
+				glVertex3f(table_bottom[0].x, table_bottom[0].y, table_bottom[0].z);
+				glVertex3f(table_bottom[3].x, table_bottom[3].y, table_bottom[3].z);
+				glVertex3f(table_bottom[2].x, table_bottom[2].y, table_bottom[2].z);
 				glEnd();
-			}
-			glPopMatrix();
-
-			glPushMatrix();
-			{
-				glBegin(GL_QUADS);   // 옆면
+				
+				glColor3f(0.3f, 0.1f, 0.0f);
+				glBegin(GL_QUADS);
+				// 옆면
 				glVertex3f(table_top[1].x, table_top[1].y, table_top[1].z);
 				glVertex3f(table_top[0].x, table_top[0].y, table_top[0].z);
 				glVertex3f(table_bottom[0].x, table_bottom[0].y, table_bottom[0].z);
 				glVertex3f(table_bottom[1].x, table_bottom[1].y, table_bottom[1].z);
-				glEnd();
-			}
-			glPopMatrix();
 
-			glPushMatrix();
-			{
-				glBegin(GL_QUADS);
 				glVertex3f(table_top[2].x, table_top[2].y, table_top[2].z);
 				glVertex3f(table_top[1].x, table_top[1].y, table_top[1].z);
 				glVertex3f(table_bottom[1].x, table_bottom[1].y, table_bottom[1].z);
 				glVertex3f(table_bottom[2].x, table_bottom[2].y, table_bottom[2].z);
-				glEnd();
-			}
-			glPopMatrix();
 
-			glPushMatrix();
-			{
-				glBegin(GL_QUADS);
 				glVertex3f(table_top[0].x, table_top[0].y, table_top[0].z);
 				glVertex3f(table_top[3].x, table_top[3].y, table_top[3].z);
 				glVertex3f(table_bottom[3].x, table_bottom[3].y, table_bottom[3].z);
 				glVertex3f(table_bottom[0].x, table_bottom[0].y, table_bottom[0].z);
-				glEnd();
-			}
-			glPopMatrix();
 
-			glPushMatrix();
-			{
-				glBegin(GL_QUADS);
 				glVertex3f(table_top[3].x, table_top[3].y, table_top[3].z);
 				glVertex3f(table_top[2].x, table_top[2].y, table_top[2].z);
 				glVertex3f(table_bottom[2].x, table_bottom[2].y, table_bottom[2].z);
 				glVertex3f(table_bottom[3].x, table_bottom[3].y, table_bottom[3].z);
 				glEnd();
+
+				glPushMatrix();
+				{   //////잡테이블//////
+					// 한 칸에 20 //
+					glColor3f(1, 1, 1);
+					glBegin(GL_LINES);      // 세로줄
+					for (int i = 0; i <= JOB_TABLE_SIZE; ++i)
+					{
+						glVertex3f(job_table[0].x - 20 * i, job_table[0].y, job_table[0].z);
+						glVertex3f(job_table[0].x - 20 * i, job_table[3].y, job_table[3].z);
+					}
+					glEnd();
+
+					glBegin(GL_LINES);      // 가로줄
+					for (int i = 0; i <= JOB_TABLE_SIZE; ++i)
+					{
+						glVertex3f(job_table[1].x, job_table[1].y, job_table[1].z + 20 * i);
+						glVertex3f(job_table[3].x, job_table[3].y, job_table[1].z + 20 * i);
+					}
+					glEnd();
+				}
+				glPopMatrix();
 			}
 			glPopMatrix();
 
 			glPushMatrix();
-			{
-				glBegin(GL_QUADS);   // 아랫면
-				glVertex3f(table_bottom[1].x, table_bottom[1].y, table_bottom[1].z);
-				glVertex3f(table_bottom[0].x, table_bottom[0].y, table_bottom[0].z);
-				glVertex3f(table_bottom[3].x, table_bottom[3].y, table_bottom[3].z);
-				glVertex3f(table_bottom[2].x, table_bottom[2].y, table_bottom[2].z);
-				glEnd();
-			}
-			glPopMatrix();
-
-			glPushMatrix();
-			{   //////잡테이블//////
-				// 한 칸에 20 //
-				glColor3f(1, 1, 1);
-				glBegin(GL_LINES);      // 세로줄
-				for (int i = 0; i <= JOB_TABLE_SIZE; ++i)
-				{
-					glVertex3f(job_table[0].x - 20 * i, job_table[0].y, job_table[0].z);
-					glVertex3f(job_table[0].x - 20 * i, job_table[3].y, job_table[3].z);
-				}
+			{   ///////제작 테이블 그리기///////
+				glColor3f(0.5f, 0.3f, 0.0f);
+				glBegin(GL_QUADS);   // 윗면
+				glVertex3f(table2_top[0].x, table2_top[0].y, table2_top[0].z);
+				glVertex3f(table2_top[1].x, table2_top[1].y, table2_top[1].z);
+				glVertex3f(table2_top[2].x, table2_top[2].y, table2_top[2].z);
+				glVertex3f(table2_top[3].x, table2_top[3].y, table2_top[3].z);
+				// 아랫면
+				glVertex3f(table2_bottom[1].x, table2_bottom[1].y, table2_bottom[1].z);
+				glVertex3f(table2_bottom[0].x, table2_bottom[0].y, table2_bottom[0].z);
+				glVertex3f(table2_bottom[3].x, table2_bottom[3].y, table2_bottom[3].z);
+				glVertex3f(table2_bottom[2].x, table2_bottom[2].y, table2_bottom[2].z);
 				glEnd();
 
-				glBegin(GL_LINES);      // 가로줄
-				for (int i = 0; i <= JOB_TABLE_SIZE; ++i)
-				{
-					glVertex3f(job_table[1].x, job_table[1].y, job_table[1].z + 20 * i);
-					glVertex3f(job_table[3].x, job_table[3].y, job_table[1].z + 20 * i);
-				}
+				glColor3f(0.3f, 0.1f, 0.0f);
+				glBegin(GL_QUADS);
+				// 옆면
+				glVertex3f(table2_top[1].x, table2_top[1].y, table2_top[1].z);
+				glVertex3f(table2_top[0].x, table2_top[0].y, table2_top[0].z);
+				glVertex3f(table2_bottom[0].x, table2_bottom[0].y, table2_bottom[0].z);
+				glVertex3f(table2_bottom[1].x, table2_bottom[1].y, table2_bottom[1].z);
+
+				glVertex3f(table2_top[2].x, table2_top[2].y, table2_top[2].z);
+				glVertex3f(table2_top[1].x, table2_top[1].y, table2_top[1].z);
+				glVertex3f(table2_bottom[1].x, table2_bottom[1].y, table2_bottom[1].z);
+				glVertex3f(table2_bottom[2].x, table2_bottom[2].y, table2_bottom[2].z);
+
+				glVertex3f(table2_top[0].x, table2_top[0].y, table2_top[0].z);
+				glVertex3f(table2_top[3].x, table2_top[3].y, table2_top[3].z);
+				glVertex3f(table2_bottom[3].x, table2_bottom[3].y, table2_bottom[3].z);
+				glVertex3f(table2_bottom[0].x, table2_bottom[0].y, table2_bottom[0].z);
+
+				glVertex3f(table2_top[3].x, table2_top[3].y, table2_top[3].z);
+				glVertex3f(table2_top[2].x, table2_top[2].y, table2_top[2].z);
+				glVertex3f(table2_bottom[2].x, table2_bottom[2].y, table2_bottom[2].z);
+				glVertex3f(table2_bottom[3].x, table2_bottom[3].y, table2_bottom[3].z);
 				glEnd();
+
+				glPushMatrix();
+				{   //////잡테이블//////
+					// 한 칸에 20 //
+					glColor3f(1, 1, 1);
+					glBegin(GL_LINES);      // 세로줄
+					for (int i = 0; i <= JOB_TABLE_SIZE; ++i)
+					{
+						glVertex3f(job_table2[0].x - 20 * i, job_table2[0].y, job_table2[0].z);
+						glVertex3f(job_table2[0].x - 20 * i, job_table2[3].y, job_table2[3].z);
+					}
+					glEnd();
+
+					glBegin(GL_LINES);      // 가로줄
+					for (int i = 0; i <= JOB_TABLE_SIZE; ++i)
+					{
+						glVertex3f(job_table2[1].x, job_table2[1].y, job_table2[1].z + 20 * i);
+						glVertex3f(job_table2[3].x, job_table2[3].y, job_table2[1].z + 20 * i);
+					}
+					glEnd();
+				}
+				glPopMatrix();
 			}
 			glPopMatrix();
 
@@ -418,17 +664,18 @@ GLvoid Reshape(int w, int h)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glEnable(GL_DEPTH_TEST);  // 은면 제거
-	glFrontFace(GL_CCW);   // 앞면 설정  
-	glEnable(GL_CULL_FACE);  // 내부는 잘라낸다  
-							 //원근투영
+	glFrontFace(GL_CCW);   // 앞면 설정 
+
 	gluPerspective(60.0, w / h, 1.0, 1000.0);
-	glTranslatef(0.0, 0.0, -300.0);
-
-	//직각투영
-	//   glOrtho(-w / 2, w / 2, -h / 2, h / 2, -300.0, 300.0);
-
+	gluLookAt(0, 0, 0, 0, -0.2, -1, 0.0, 1.0, 0.0);
+	glTranslatef(MoveX, MoveY, MoveZ);
+	glRotatef(DegreeX, 1, 0, 0);
+	glRotatef(DegreeY, 0, 1, 0);
+	glRotatef(DegreeZ, 0, 0, 1);
 	glMatrixMode(GL_MODELVIEW);
-	gluLookAt(0, 0, 0, 0, -0.5, -1.0, 0.0, 1.0, 0.0);
+
+	Width = w;
+	Height = h;
 }
 
 void Mouse(int button, int state, int x, int y)
@@ -460,8 +707,13 @@ void Mouse(int button, int state, int x, int y)
 void Motion(int x, int y) {
 
 	if (LEFT_BUTTON)
-		DegreeY += (mouse.x - x) * 0.01;
+	{
+		DegreeY += (x - mouse.x) * 0.01;
+		Reshape(Width, Height);
+	}
 	if (RIGHT_BUTTON)
-		DegreeX += (mouse.y - y) * 0.01;
-
+	{
+		DegreeX += (y - mouse.y) * 0.01;
+		Reshape(Width, Height);
+	}
 }
