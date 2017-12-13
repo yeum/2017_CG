@@ -1,6 +1,10 @@
-#include <GL/glut.h>
+#include <glut.h>
+
 #include <fstream>
-#include <stdlib.h>
+
+#include <cstdlib>
+
+#include <stdio.h>   // sprintf
 
 using namespace std;
 
@@ -36,12 +40,16 @@ float MoveX, MoveY, MoveZ;
 XYZPOS table_top[4], table_bottom[4], job_table[4];
 XYZPOS table2_top[4], table2_bottom[4], job_table2[4];
 BUILD build_cube[JOB_TABLE_SIZE][MAX_HEIGHT][JOB_TABLE_SIZE];
+BUILD quest_cube[JOB_TABLE_SIZE][MAX_HEIGHT][JOB_TABLE_SIZE];
 XYZPOS picked_cube, build_idx;
 int picked_idx;
 XYZPOS mouse;
 int Mode, PreMode;
+float timer;
 
 bool LEFT_BUTTON, RIGHT_BUTTON;
+bool SAVE_ON;
+
 
 void main(int argc, char *argv[])
 {
@@ -324,9 +332,24 @@ void Keyboard(unsigned char key, int x, int y)
 		}
 
 	}
-	else if (key == 'l' || key == 'L') {
+	else if (key == 'l' || key == 'L')
+	{// l or L 저장 블럭 불러오기
+		char buf[100]{ 0 };      // 파일명을 저장할 버퍼
+		int file_num = 0;      // 몇번째 파일인지 기록
+
+		for (file_num = 0; file_num < 100; ++file_num) {      // 0에서 최대 100개의 파일을 만들수 있음.
+			sprintf_s(buf, "build_cube_%d.txt", file_num);      // 버퍼에 file_num번째 파일명을 넣음
+			ifstream read;
+			read.open(buf);
+			if (!read) {   // read로 만약 파일이 존재하지 않을경우 break
+				break;
+			}
+			read.close();
+		}
+		sprintf_s(buf, "build_cube_%d.txt", rand() % file_num);   // file_num 전까지는 파일이 있으므로 그 사이에서 rand를 한다.
+
 		FILE *fp;
-		fopen_s(&fp, "build_cube.txt", "r");
+		fopen_s(&fp, buf, "r");
 		int a, b, c;
 		while (!feof(fp)) {
 			a = -1, b = -1, c = -1;
@@ -335,6 +358,9 @@ void Keyboard(unsigned char key, int x, int y)
 			if (a == -1 || b == -1 || c == -1) {
 
 			}
+			/*else {
+			quest_cube[a][b][c].put = true;
+			}*/
 			else {
 				build_cube[a][b][c].put = true;
 			}
@@ -366,7 +392,20 @@ void Keyboard(unsigned char key, int x, int y)
 	else if (key == 13)
 	{// 블럭 다 쌓고 엔터 > 저장
 		ofstream WriteFile;
-		WriteFile.open("build_cube.txt", ios_base::trunc);
+		char buf[100]{ 0 };      // 파일명을 저장할 버퍼
+		int file_num = 0;      // 몇번째 파일인지 기록
+
+		for (file_num = 0; file_num < 100; ++file_num) {      // 0에서 최대 100개의 파일을 만들수 있음.
+			sprintf_s(buf, "build_cube_%d.txt", file_num);      // 버퍼에 file_num번째 파일명을 넣음
+			ifstream read;
+			read.open(buf);
+			if (!read) {   // read로 만약 파일이 존재하지 않을경우 break
+				break;
+			}
+			read.close();
+		}
+
+		WriteFile.open(buf, ios_base::trunc);
 		WriteFile.close();
 		for (int i = 0; i < JOB_TABLE_SIZE; ++i)
 		{
@@ -377,31 +416,78 @@ void Keyboard(unsigned char key, int x, int y)
 					if (build_cube[i][j][k].put)
 					{
 						ofstream WriteFile;
-						WriteFile.open("build_cube.txt", ios_base::app);
+						WriteFile.open(buf, ios_base::app);
 						WriteFile << i << ',' << j << ',' << k << endl;
 						WriteFile.close();
+						build_cube[i][j][k].put = false;
 					}
 				}
 			}
 		}
+
+		SAVE_ON = true;
+		build_idx = { 2,0,4 };
 	}
 	else if (key == '1')
 	{
 		if (Mode != GameMode::Play)
 		{
+			DegreeX = 0;
+			DegreeY = 0;
+			DegreeZ = 0;
 			PreMode = Mode;
 			Mode = GameMode::Play;
 			SetupRC_byMode();
+
+			char buf[100]{ 0 };      // 파일명을 저장할 버퍼
+			int file_num = 0;      // 몇번째 파일인지 기록
+
+			for (file_num = 0; file_num < 100; ++file_num) {      // 0에서 최대 100개의 파일을 만들수 있음.
+				sprintf_s(buf, "build_cube_%d.txt", file_num);      // 버퍼에 file_num번째 파일명을 넣음
+				ifstream read;
+				read.open(buf);
+				if (!read) {   // read로 만약 파일이 존재하지 않을경우 break
+					break;
+				}
+				read.close();
+			}
+			sprintf_s(buf, "build_cube_%d.txt", rand() % file_num);   // file_num 전까지는 파일이 있으므로 그 사이에서 rand를 한다.
+
+			FILE *fp;
+			fopen_s(&fp, buf, "r");
+			int a, b, c;
+			while (!feof(fp)) {
+				a = -1, b = -1, c = -1;
+				fscanf_s(fp, "%d,%d,%d", &a, &b, &c);
+				printf("%d %d %d\n", a, b, c);
+				if (a == -1 || b == -1 || c == -1) {
+
+				}
+				/*else {
+				quest_cube[a][b][c].put = true;
+				}*/
+				else {
+					build_cube[a][b][c].put = true;
+				}
+			}
 		}
 	}
 	else if (key == '2')
 	{
 		if (Mode != GameMode::Tool)
 		{
+			DegreeX = 0;
+			DegreeY = 0;
+			DegreeZ = 0;
 			PreMode = Mode;
 			Mode = GameMode::Tool;
 			SetupRC_byMode();
 		}
+	}
+
+	else if (key == 27)
+	{// 종료
+		exit(0);
 	}
 	glutPostRedisplay();
 }
@@ -442,6 +528,9 @@ void TimerFunction(int value)
 		if (MoveX >= 0)
 			MoveX = 0;
 	}
+
+	if (SAVE_ON)
+		timer++;
 	Reshape(Width, Height);
 	glutPostRedisplay();
 	glutTimerFunc(100, TimerFunction, 1);
@@ -468,7 +557,7 @@ GLvoid drawScene(GLvoid)
 	glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 
-	if(Mode==GameMode::Play)
+	if (Mode == GameMode::Play)
 		glEnable(GL_LIGHT0);
 	else
 		glDisable(GL_LIGHT0);
@@ -506,7 +595,7 @@ GLvoid drawScene(GLvoid)
 				glVertex3f(table_bottom[3].x, table_bottom[3].y, table_bottom[3].z);
 				glVertex3f(table_bottom[2].x, table_bottom[2].y, table_bottom[2].z);
 				glEnd();
-				
+
 				glColor3f(0.3f, 0.1f, 0.0f);
 				glBegin(GL_QUADS);
 				// 옆면
@@ -614,6 +703,7 @@ GLvoid drawScene(GLvoid)
 					}
 					glEnd();
 				}
+
 				glPopMatrix();
 			}
 			glPopMatrix();
@@ -625,6 +715,31 @@ GLvoid drawScene(GLvoid)
 				glutSolidCube(CUBE_SIZE);
 			}
 			glPopMatrix();
+
+
+			// 불러온 블럭
+			//glEnable(GL_BLEND);
+			//glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
+			//glColor4f(0.7f, 0.5f, 0.0f, 0.5f);
+			//for (int i = 0; i < JOB_TABLE_SIZE; ++i)
+			//{
+			//   for (int j = 0; j < MAX_HEIGHT; ++j)
+			//   {
+			//      for (int k = 0; k < JOB_TABLE_SIZE; ++k)
+			//      {
+			//         if (quest_cube[i][j][k].put)
+			//         {
+			//            glPushMatrix();
+			//            {
+			//               glTranslatef(quest_cube[i][j][k].x, quest_cube[i][j][k].y + CUBE_SIZE / 2, quest_cube[i][j][k].z);
+			//               glutSolidCube(CUBE_SIZE);
+			//            }
+			//            glPopMatrix();
+			//         }
+			//      }
+			//   }
+			//}
+
 
 
 			//플레이어가 쌓은 큐브
@@ -649,10 +764,29 @@ GLvoid drawScene(GLvoid)
 				}
 			}
 
+
 		}
 		glPopMatrix();
 
+		glPushMatrix();
+		{
+			if (SAVE_ON && timer < 10)
+			{
+				char *string = "SAVE";
+				glRasterPos2f(590, 0);  // 문자 출력할 위치 설정 
+				int len = (int)strlen(string);
+				for (int i = 0; i < len; i++)
+					glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, string[i]);
+			}
+			else
+			{
+				SAVE_ON = false;
+				timer = 0;
+			}
+		}
+		glPopMatrix();
 	}
+
 	glPopMatrix();
 
 	glutSwapBuffers();
@@ -683,6 +817,7 @@ void Mouse(int button, int state, int x, int y)
 	if ((button == GLUT_LEFT_BUTTON) && (state == GLUT_DOWN))
 	{
 		mouse.x = x;
+
 		LEFT_BUTTON = true;
 	}
 	if ((button == GLUT_RIGHT_BUTTON) && (state == GLUT_DOWN))
@@ -708,12 +843,12 @@ void Motion(int x, int y) {
 
 	if (LEFT_BUTTON)
 	{
-		DegreeY += (x - mouse.x) * 0.01;
+		DegreeY += (x - mouse.x) * 0.005;
 		Reshape(Width, Height);
 	}
 	if (RIGHT_BUTTON)
 	{
-		DegreeX += (y - mouse.y) * 0.01;
+		DegreeX += (y - mouse.y) * 0.005;
 		Reshape(Width, Height);
 	}
 }
