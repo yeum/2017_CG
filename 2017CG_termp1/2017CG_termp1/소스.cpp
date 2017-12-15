@@ -171,6 +171,11 @@ void SetupRC_byMode()
 					build_cube[i][j][k].z = (k - JOB_TABLE_SIZE / 2) * CUBE_SIZE;
 					build_cube[i][j][k].y = j*CUBE_SIZE;
 					build_cube[i][j][k].put = false;
+				
+					quest_cube[i][j][k].x = (i - JOB_TABLE_SIZE / 2) * CUBE_SIZE;
+					quest_cube[i][j][k].z = (k - JOB_TABLE_SIZE / 2) * CUBE_SIZE;
+					quest_cube[i][j][k].y = j*CUBE_SIZE;
+					quest_cube[i][j][k].put = false;
 				}
 			}
 		}
@@ -358,11 +363,9 @@ void Keyboard(unsigned char key, int x, int y)
 			if (a == -1 || b == -1 || c == -1) {
 
 			}
-			/*else {
-			quest_cube[a][b][c].put = true;
-			}*/
 			else {
-				build_cube[a][b][c].put = true;
+				quest_cube[a][b][c].put = true;
+				//build_cube[a][b][c].put = true;
 			}
 		}
 
@@ -463,11 +466,9 @@ void Keyboard(unsigned char key, int x, int y)
 				if (a == -1 || b == -1 || c == -1) {
 
 				}
-				/*else {
-				quest_cube[a][b][c].put = true;
-				}*/
 				else {
-					build_cube[a][b][c].put = true;
+					quest_cube[a][b][c].put = true;
+					//build_cube[a][b][c].put = true;
 				}
 			}
 		}
@@ -718,33 +719,34 @@ GLvoid drawScene(GLvoid)
 
 
 			// 불러온 블럭
-			//glEnable(GL_BLEND);
-			//glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
-			//glColor4f(0.7f, 0.5f, 0.0f, 0.5f);
-			//for (int i = 0; i < JOB_TABLE_SIZE; ++i)
-			//{
-			//   for (int j = 0; j < MAX_HEIGHT; ++j)
-			//   {
-			//      for (int k = 0; k < JOB_TABLE_SIZE; ++k)
-			//      {
-			//         if (quest_cube[i][j][k].put)
-			//         {
-			//            glPushMatrix();
-			//            {
-			//               glTranslatef(quest_cube[i][j][k].x, quest_cube[i][j][k].y + CUBE_SIZE / 2, quest_cube[i][j][k].z);
-			//               glutSolidCube(CUBE_SIZE);
-			//            }
-			//            glPopMatrix();
-			//         }
-			//      }
-			//   }
-			//}
+			glEnable(GL_BLEND);
+			glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
+			glColor4f(0.5f, 0.3f, 0.0f, 0.5f);
+			for (int i = 0; i < JOB_TABLE_SIZE; ++i)
+			{
+			   for (int j = 0; j < MAX_HEIGHT; ++j)
+			   {
+			      for (int k = 0; k < JOB_TABLE_SIZE; ++k)
+			      {
+			         if (quest_cube[i][j][k].put)
+			         {
+			            glPushMatrix();
+			            {
+			               glTranslatef(quest_cube[i][j][k].x, quest_cube[i][j][k].y + CUBE_SIZE / 2, quest_cube[i][j][k].z);
+			               glutSolidCube(CUBE_SIZE);
+			            }
+			            glPopMatrix();
+			         }
+			      }
+			   }
+			}
+			glDisable(GL_BLEND);
 
 
 
 			//플레이어가 쌓은 큐브
 
-			glColor3f(0.7f, 0.5f, 0.0f);
+			glColor4f(0.7f, 0.5f, 0.0f, 1.f);
 			for (int i = 0; i < JOB_TABLE_SIZE; ++i)
 			{
 				for (int j = 0; j < MAX_HEIGHT; ++j)
@@ -843,12 +845,14 @@ void Motion(int x, int y) {
 
 	if (LEFT_BUTTON)
 	{
-		DegreeY += (x - mouse.x) * 0.005;
+		DegreeY += (x - mouse.x) * 0.05;
+		mouse.x = x;
 		Reshape(Width, Height);
 	}
 	if (RIGHT_BUTTON)
 	{
-		DegreeX += (y - mouse.y) * 0.005;
+		DegreeX += (y - mouse.y) * 0.05;
+		mouse.y = y;
 		Reshape(Width, Height);
 	}
 }
