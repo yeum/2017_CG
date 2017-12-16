@@ -1,11 +1,12 @@
 ﻿  소스.cpp
 c:\users\user\desktop\2학년2학기\컴그\2017_cg\2017cg_termp\2017cg_termp\소스.cpp(238): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(205): note: 'fopen' 선언을 참조하십시오.
-c:\users\user\desktop\2학년2학기\컴그\2017_cg\2017cg_termp\2017cg_termp\소스.cpp(998): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _itoa. See online help for details.
+c:\users\user\desktop\2학년2학기\컴그\2017_cg\2017cg_termp\2017cg_termp\소스.cpp(1038): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _itoa. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdlib.h(1316): note: 'itoa' 선언을 참조하십시오.
-c:\users\user\desktop\2학년2학기\컴그\2017_cg\2017cg_termp\2017cg_termp\소스.cpp(1004): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _itoa. See online help for details.
+c:\users\user\desktop\2학년2학기\컴그\2017_cg\2017cg_termp\2017cg_termp\소스.cpp(1044): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _itoa. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdlib.h(1316): note: 'itoa' 선언을 참조하십시오.
-c:\users\user\desktop\2학년2학기\컴그\2017_cg\2017cg_termp\2017cg_termp\소스.cpp(1010): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _itoa. See online help for details.
+c:\users\user\desktop\2학년2학기\컴그\2017_cg\2017cg_termp\2017cg_termp\소스.cpp(1050): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _itoa. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdlib.h(1316): note: 'itoa' 선언을 참조하십시오.
+cl : 명령줄 warning D9028: 최소 다시 빌드에 실패했습니다. 정상 빌드로 되돌립니다.
   2017CG_termp.vcxproj -> C:\Users\USER\Desktop\2학년2학기\컴그\2017_CG\2017CG_termp\Debug\2017CG_termp.exe
   2017CG_termp.vcxproj -> C:\Users\USER\Desktop\2학년2학기\컴그\2017_CG\2017CG_termp\Debug\2017CG_termp.pdb (Full PDB)

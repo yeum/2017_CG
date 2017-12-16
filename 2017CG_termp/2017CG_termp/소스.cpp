@@ -160,8 +160,8 @@ void SetupRC() {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 }
 
@@ -755,38 +755,58 @@ GLvoid drawScene(GLvoid)
 					}
 				}
 				glEnd();
-				glDisable(GL_TEXTURE_2D);
 
-				glColor3f(0.3f, 0.1f, 0.0f);
+				glColor3f(0.7f, 0.5f, 0.4f);
 				glBegin(GL_QUADS);// 아랫면
+				glTexCoord2f(1, 1);  // 텍스처 위치 설정
 				glVertex3f(table_bottom[1].x, table_bottom[1].y, table_bottom[1].z);
+				glTexCoord2f(0, 1);  // 텍스처 위치 설정
 				glVertex3f(table_bottom[0].x, table_bottom[0].y, table_bottom[0].z);
+				glTexCoord2f(0, 0);  // 텍스처 위치 설정
 				glVertex3f(table_bottom[3].x, table_bottom[3].y, table_bottom[3].z);
+				glTexCoord2f(1, 0);  // 텍스처 위치 설정
 				glVertex3f(table_bottom[2].x, table_bottom[2].y, table_bottom[2].z);
 				glEnd();
 
 				glBegin(GL_QUADS);
 				// 옆면
+				glTexCoord2f(1, 1);  // 텍스처 위치 설정
 				glVertex3f(table_top[1].x, table_top[1].y, table_top[1].z);
+				glTexCoord2f(0, 1);  // 텍스처 위치 설정
 				glVertex3f(table_top[0].x, table_top[0].y, table_top[0].z);
+				glTexCoord2f(0, 0);  // 텍스처 위치 설정
 				glVertex3f(table_bottom[0].x, table_bottom[0].y, table_bottom[0].z);
+				glTexCoord2f(1, 0);  // 텍스처 위치 설정
 				glVertex3f(table_bottom[1].x, table_bottom[1].y, table_bottom[1].z);
 
+				glTexCoord2f(1, 1);  // 텍스처 위치 설정
 				glVertex3f(table_top[2].x, table_top[2].y, table_top[2].z);
+				glTexCoord2f(0, 1);  // 텍스처 위치 설정
 				glVertex3f(table_top[1].x, table_top[1].y, table_top[1].z);
+				glTexCoord2f(0, 0);  // 텍스처 위치 설정
 				glVertex3f(table_bottom[1].x, table_bottom[1].y, table_bottom[1].z);
+				glTexCoord2f(1, 0);  // 텍스처 위치 설정
 				glVertex3f(table_bottom[2].x, table_bottom[2].y, table_bottom[2].z);
 
+				glTexCoord2f(1, 1);  // 텍스처 위치 설정
 				glVertex3f(table_top[0].x, table_top[0].y, table_top[0].z);
+				glTexCoord2f(0, 1);  // 텍스처 위치 설정
 				glVertex3f(table_top[3].x, table_top[3].y, table_top[3].z);
+				glTexCoord2f(0, 0);  // 텍스처 위치 설정
 				glVertex3f(table_bottom[3].x, table_bottom[3].y, table_bottom[3].z);
+				glTexCoord2f(1, 0);  // 텍스처 위치 설정
 				glVertex3f(table_bottom[0].x, table_bottom[0].y, table_bottom[0].z);
 
+				glTexCoord2f(1, 1);  // 텍스처 위치 설정
 				glVertex3f(table_top[3].x, table_top[3].y, table_top[3].z);
+				glTexCoord2f(0, 1);  // 텍스처 위치 설정
 				glVertex3f(table_top[2].x, table_top[2].y, table_top[2].z);
+				glTexCoord2f(0, 0);  // 텍스처 위치 설정
 				glVertex3f(table_bottom[2].x, table_bottom[2].y, table_bottom[2].z);
+				glTexCoord2f(1, 0);  // 텍스처 위치 설정
 				glVertex3f(table_bottom[3].x, table_bottom[3].y, table_bottom[3].z);
 				glEnd();
+				glDisable(GL_TEXTURE_2D);
 
 				glPushMatrix();
 				{   //////잡테이블//////
@@ -835,38 +855,58 @@ GLvoid drawScene(GLvoid)
 					}
 				}
 				glEnd();
-				glDisable(GL_TEXTURE_2D);
 
+				glColor3f(0.7f, 0.5f, 0.4f);
 				glBegin(GL_QUADS);// 아랫면
+				glTexCoord2f(1, 1);  // 텍스처 위치 설정
 				glVertex3f(table2_bottom[1].x, table2_bottom[1].y, table2_bottom[1].z);
+				glTexCoord2f(0, 1);  // 텍스처 위치 설정
 				glVertex3f(table2_bottom[0].x, table2_bottom[0].y, table2_bottom[0].z);
+				glTexCoord2f(0, 0);  // 텍스처 위치 설정
 				glVertex3f(table2_bottom[3].x, table2_bottom[3].y, table2_bottom[3].z);
+				glTexCoord2f(1, 0);  // 텍스처 위치 설정
 				glVertex3f(table2_bottom[2].x, table2_bottom[2].y, table2_bottom[2].z);
 				glEnd();
 
-				glColor3f(0.3f, 0.1f, 0.0f);
 				glBegin(GL_QUADS);
 				// 옆면
+				glTexCoord2f(1, 1);  // 텍스처 위치 설정
 				glVertex3f(table2_top[1].x, table2_top[1].y, table2_top[1].z);
+				glTexCoord2f(0, 1);  // 텍스처 위치 설정
 				glVertex3f(table2_top[0].x, table2_top[0].y, table2_top[0].z);
+				glTexCoord2f(0, 0);  // 텍스처 위치 설정
 				glVertex3f(table2_bottom[0].x, table2_bottom[0].y, table2_bottom[0].z);
+				glTexCoord2f(1, 0);  // 텍스처 위치 설정
 				glVertex3f(table2_bottom[1].x, table2_bottom[1].y, table2_bottom[1].z);
 
+				glTexCoord2f(1, 1);  // 텍스처 위치 설정
 				glVertex3f(table2_top[2].x, table2_top[2].y, table2_top[2].z);
+				glTexCoord2f(0, 1);  // 텍스처 위치 설정
 				glVertex3f(table2_top[1].x, table2_top[1].y, table2_top[1].z);
+				glTexCoord2f(0, 0);  // 텍스처 위치 설정
 				glVertex3f(table2_bottom[1].x, table2_bottom[1].y, table2_bottom[1].z);
+				glTexCoord2f(1, 0);  // 텍스처 위치 설정
 				glVertex3f(table2_bottom[2].x, table2_bottom[2].y, table2_bottom[2].z);
 
+				glTexCoord2f(1, 1);  // 텍스처 위치 설정
 				glVertex3f(table2_top[0].x, table2_top[0].y, table2_top[0].z);
+				glTexCoord2f(0, 1);  // 텍스처 위치 설정
 				glVertex3f(table2_top[3].x, table2_top[3].y, table2_top[3].z);
+				glTexCoord2f(0, 0);  // 텍스처 위치 설정
 				glVertex3f(table2_bottom[3].x, table2_bottom[3].y, table2_bottom[3].z);
+				glTexCoord2f(1, 0);  // 텍스처 위치 설정
 				glVertex3f(table2_bottom[0].x, table2_bottom[0].y, table2_bottom[0].z);
 
+				glTexCoord2f(1, 1);  // 텍스처 위치 설정
 				glVertex3f(table2_top[3].x, table2_top[3].y, table2_top[3].z);
+				glTexCoord2f(0, 1);  // 텍스처 위치 설정
 				glVertex3f(table2_top[2].x, table2_top[2].y, table2_top[2].z);
+				glTexCoord2f(0, 0);  // 텍스처 위치 설정
 				glVertex3f(table2_bottom[2].x, table2_bottom[2].y, table2_bottom[2].z);
+				glTexCoord2f(1, 0);  // 텍스처 위치 설정
 				glVertex3f(table2_bottom[3].x, table2_bottom[3].y, table2_bottom[3].z);
 				glEnd();
+				glDisable(GL_TEXTURE_2D);
 
 				glPushMatrix();
 				{   //////잡테이블//////
@@ -1033,9 +1073,9 @@ GLvoid drawScene(GLvoid)
 		{
 			if (Mode == GameMode::Main)
 			{
+				glEnable(GL_TEXTURE_2D);
 				glTranslatef(300, -40, 180);
 				glRotatef(-10, 1, 0, 0);
-				glEnable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, texture[1]);
 				glBegin(GL_QUADS);
 				{
@@ -1116,13 +1156,13 @@ void Motion(int x, int y) {
 
 	if (LEFT_BUTTON)
 	{
-		DegreeY += (x - mouse.x) /7;
+		DegreeY += (x - mouse.x) /5;
 		mouse.x = x;
 		Reshape(Width, Height);
 	}
 	if (RIGHT_BUTTON)
 	{
-		DegreeX += (y - mouse.y) /7;
+		DegreeX += (y - mouse.y) /5;
 		mouse.y = y;
 		Reshape(Width, Height);
 	}
