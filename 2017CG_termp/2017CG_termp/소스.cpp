@@ -62,7 +62,7 @@ bool SAVE_ON;
 
 GLubyte* bitmap;
 BITMAPINFO* bitmapInfo; // 비트맵 헤더 저장할 변수 
-GLuint texture[1];
+GLuint texture[2];
 
 int hour, min, sec;
 
@@ -86,7 +86,7 @@ void main(int argc, char *argv[])
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH); // 디스플레이 모드 설정 
 	glutInitWindowPosition(100, 100); // 윈도우의 위치지정 
 	glutInitWindowSize(800, 600); // 윈도우의 크기 지정 
-	glutCreateWindow("Example"); // 윈도우 생성 (윈도우 이름) 
+	glutCreateWindow("Stacker"); // 윈도우 생성 (윈도우 이름) 
 	glutDisplayFunc(drawScene); // 출력 함수의 지정
 	glutReshapeFunc(Reshape); // 다시 그리기 함수의 지정 
 	glutSpecialFunc(SpecialFunc);
@@ -105,7 +105,6 @@ void SetupRC() {
 	// 기능 설정 초기화
 
 	// 플레이 테이블
-	
 	table_top[0].y = table_top[1].y = table_top[2].y = table_top[3].y = 0;
 	table_top[0].x = table_top[3].x = 150;
 	table_top[1].x = table_top[2].x = -150;
@@ -396,7 +395,7 @@ void Keyboard(unsigned char key, int x, int y)
 			build_idx.y--;
 		}
 	}
-	else if (key == 32)
+	else if (key == 32 && clear_sign == false)
 	{// 스페이스바 입력 => 블럭 놓기
 		if (build_cube[build_idx.x][build_idx.y][build_idx.z].put == false)
 		{
@@ -420,40 +419,7 @@ void Keyboard(unsigned char key, int x, int y)
 		}
 		
 	}
-	else if (key == 'l' || key == 'L')
-	{// l or L 저장 블럭 불러오기
-		char buf[100]{ 0 };      // 파일명을 저장할 버퍼
-		int file_num = 0;      // 몇번째 파일인지 기록
-
-		for (file_num = 0; file_num < 100; ++file_num) {      // 0에서 최대 100개의 파일을 만들수 있음.
-			sprintf_s(buf, "build_cube_%d.txt", file_num);      // 버퍼에 file_num번째 파일명을 넣음
-			ifstream read;
-			read.open(buf);
-			if (!read) {   // read로 만약 파일이 존재하지 않을경우 break
-				break;
-			}
-			read.close();
-		}
-		sprintf_s(buf, "build_cube_%d.txt", rand() % file_num);   // file_num 전까지는 파일이 있으므로 그 사이에서 rand를 한다.
-
-		FILE *fp;
-		fopen_s(&fp, buf, "r");
-		int a, b, c;
-		while (!feof(fp)) {
-			a = -1, b = -1, c = -1;
-			fscanf_s(fp, "%d,%d,%d", &a, &b, &c);
-			printf("%d %d %d\n", a, b, c);
-			if (a == -1 || b == -1 || c == -1) {
-
-			}
-			else {
-				quest_cube[a][b][c].put = true;
-				//build_cube[a][b][c].put = true;
-			}
-		}
-
-	}
-	else if (key == 8)
+	else if (key == 8 && clear_sign == false)
 	{// 블럭 놓인 위치에서 백스페이스바 > 블럭 지우기
 		if (build_cube[build_idx.x][build_idx.y][build_idx.z].put == true)
 		{
@@ -611,9 +577,9 @@ void Keyboard(unsigned char key, int x, int y)
 
 void TimerFunction(int value)
 {
-	if (PreMode == GameMode::Main && Mode == GameMode::Play)
+	if (Mode == GameMode::Play)
 	{
-		MoveX += 20;
+		MoveX += 40;
 		MoveZ += 20;
 
 		if (MoveX >= 0)
@@ -621,9 +587,9 @@ void TimerFunction(int value)
 		if (MoveZ >= -300)
 			MoveZ = -300;
 	}
-	else if (PreMode == GameMode::Main && Mode == GameMode::Tool)
+	else if (Mode == GameMode::Tool)
 	{
-		MoveX -= 20;
+		MoveX -= 40;
 		MoveZ += 20;
 		
 		if (MoveX <= -600)
@@ -631,21 +597,6 @@ void TimerFunction(int value)
 		if (MoveZ >= -300)
 			MoveZ = -300;
 	}
-	else if (PreMode == GameMode::Play && Mode == GameMode::Tool)
-	{
-		MoveX -= 60;
-
-		if (MoveX <= -600)
-			MoveX = -600;
-	}
-	else if (PreMode == GameMode::Tool && Mode == GameMode::Play)
-	{
-		MoveX += 60;
-
-		if (MoveX >= 0)
-			MoveX = 0;
-	}
-
 	if (SAVE_ON)
 		timer++;
 	Reshape(Width, Height);
@@ -718,12 +669,8 @@ GLvoid drawScene(GLvoid)
 		glDisable(GL_LIGHT0);
 	}
 
-	
-
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-
-	
 
 	//glLoadIdentity();
 	glPushMatrix();

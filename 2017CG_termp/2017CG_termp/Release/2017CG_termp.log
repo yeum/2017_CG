@@ -1,16 +1,16 @@
 ﻿  소스.cpp
-소스.cpp(238): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+소스.cpp(237): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\stdio.h(205): note: 'fopen' 선언을 참조하십시오.
-소스.cpp(1038): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _itoa. See online help for details.
+소스.cpp(985): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _itoa. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\stdlib.h(1316): note: 'itoa' 선언을 참조하십시오.
-소스.cpp(1044): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _itoa. See online help for details.
+소스.cpp(991): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _itoa. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\stdlib.h(1316): note: 'itoa' 선언을 참조하십시오.
-소스.cpp(1050): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _itoa. See online help for details.
+소스.cpp(997): warning C4996: 'itoa': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _itoa. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\stdlib.h(1316): note: 'itoa' 선언을 참조하십시오.
   코드를 생성하고 있습니다.
-  3 of 164 functions ( 1.8%) were compiled, the rest were copied from previous compilation.
+  5 of 164 functions ( 3.0%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+    12 functions had inline decision re-evaluated but remain unchanged
   코드를 생성했습니다.
   2017CG_termp.vcxproj -> C:\Users\USER\Desktop\2학년2학기\컴그\2017_CG\2017CG_termp\Release\2017CG_termp.exe
   2017CG_termp.vcxproj -> C:\Users\USER\Desktop\2학년2학기\컴그\2017_CG\2017CG_termp\Release\2017CG_termp.pdb (Full PDB)
